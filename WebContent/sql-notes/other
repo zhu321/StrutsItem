@@ -1,0 +1,20 @@
+truncate userscore;
+
+补充：有外键约束的表不能用truncate，要先进行别的处理
+1. 主外键是数据库提供的强约束，可以帮助我们控制主子表之间的关系，但同时还是一把双刃剑，当然，我们认为既然定义了主外键，就是需要这种强制关系，但有时可能就会有一些变更，因此，如何取舍，需要根据实际情况来决策。
+2. 主外键关联中的主表，如果有数据，则不能直接用truncate方式删除，因为会认为有外键和其关联，不能直接截断主表，若需要做，可以先禁止外键约束，主表变成一个独立的表，这样就可以执行truncate了。
+
+mysql语句中----删除表数据drop、truncate和delete的用法
+程度从强到弱
+1、drop  table tb 
+      drop将表格直接删除，没有办法找回
+2、truncate (table) tb
+      删除表中的所有数据，不能与where一起使用
+3、delete from tb (where)
+      删除表中的数据(可制定某一行)
+区别：truncate和delete的区别
+         1、事务：truncate是不可以rollback的，但是delete是可以rollback的；
+              原因：truncate删除整表数据(ddl语句,隐式提交)，delete是一行一行的删除，可以rollback
+         2、效果：truncate删除后将重新水平线和索引(id从零开始) ,delete不会删除索引    
+         3、 truncate 不能触发任何Delete触发器。
+         4、delete 删除可以返回行数

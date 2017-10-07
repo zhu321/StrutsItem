@@ -1,0 +1,146 @@
+mysql:  \c
+
+跟随外键变动
+foreign key (com_id) references comment(com_id)	on delete cascade on update cascade
+
+#manager
+create table manager(
+	m_id int primary key auto_increment,
+	m_name varchar(20) unique,
+	m_pass varchar(20)
+)auto_increment=2014001;charset utf8;
+
+
+#记录manager的工作,,待定
+create table recordmanager(){
+	record_id int primary key auto_increment,
+	m_id int,
+	logintime datetime,
+	logout datetime,
+	foreign key (m_id) references manager(m_id)
+}
+
+
+##########################################################
+#思考：当进行组织重组时，如何将多个部门合并为一个？，，当删除多个部门时，都改为"待定"后，如何合并成一条记录，user表又如何跟着变化
+#解决办法：迂回政策
+先将该部门对应的user都改为要合并的部门，再删除部门表的部门
+
+#部门表，检务部、动检部、植检部、财务部、统计部
+create table department(
+	dep_id tinyint primary key auto_increment,
+	dep_name varchar(20)
+) charset utf8;
+
+#用户表,后几个字段：部门，学历(存在双学历等情况，暂时不考虑)，专业，激活状态、最后登录时间、登录次数
+create table users(
+	u_id int primary key auto_increment,
+	u_name varchar(20) unique,
+	u_pass varchar(20),
+	u_sex char(2),
+	u_birth datetime,
+	dep_id tinyint,
+	edu_id tinyint,
+	major_id int, #专业
+	active_state tinyint not null default 2, #未激活
+	active_time datetime,
+	last_login datetime,
+	login_times int not null default 0,
+	foreign key (dep_id) references department(dep_id)
+)charset utf8;
+
+#学历表,高中，专科、本科、研究生、硕士、博士
+create table educational(
+	edu_id tinyint primary key auto_increment,
+	edu_name varchar(10)
+)charset utf8;
+
+
+#专业表，计算机、会计、金融、英语
+create table major(
+	major_id int primary key auto_increment,
+	major_name varchar(20)
+)charset utf8;
+
+
+#激活状态表，1：已激活 2.未激活
+create table activestate(
+	active_state tinyint primary key auto_increment,
+	active_name varchar(5)
+)charset utf8;
+
+insert into activestate(active_name) values('已激活');#1
+insert into activestate(active_name) values('未激活');#2
+
+##########################################################
+#questionbank 题库
+
+#choicebank，，，若有1000多个部门，如何查找，，把逗号带上就行，like '%,11,%'
+create table choicebank(
+	choice_id int primary key auto_increment,
+	choice_content varchar(200),
+	choice_A varchar(50),
+	choice_B varchar(50),
+	choice_C varchar(50),
+	choice_D varchar(50),
+	choice_type char(2),#单选，多选
+	choice_answer char(4),
+	choice_department varchar(20),#1,2,3,4,5,6
+	m_id int #增加一个m_id,出题时要用
+)charset utf8;
+
+#试卷维护，设定试题数量，题目的分数，生成试卷时，要来该表查询要自动抽取多少题
+create table maintaintestpaper(
+	maintain_id int primary key auto_increment,
+	single_quantity tinyint,
+	single_grade tinyint,
+	multiple_quantity tinyint,
+	multiple_grade tinyint,
+	totalscore tinyint, #总分
+	totaltime tinyint, #考试总时间,单位：分钟
+	maintain_time datetime not null default now() #时间
+)charset utf8;
+
+
+#testpaper 试卷，再加一个m_id，可以在查看试卷时就只查看最新试卷
+create table testpaper(
+	test_id int primary key auto_increment,
+	test_name varchar(50),  #试卷名称
+	maintain_id int, #加上
+	single_content varchar(1000),   #所有抽取的单选题的id总和
+	multiple_content varchar(500), #多选题的id总和
+	start_time datetime,
+	end_time datetime,
+	dep_id int,
+	test_time datetime not null default now(), #试卷的生成时间,注意now()不要加引号,'now()'
+	m_id int
+)auto_increment=2017001;charset utf8;
+
+
+打开试卷同时，就开始记录考试时间，
+在考试过程中，当学员主动中断（关闭考试浏览器窗口）或网络中断，系统将记录
+此学员此次网上考试失败，但要记录学员已经打开试卷和打开时间。
+
+如何实现：
+增加一个备注字段，当用户一开始考试，就向该表插入一条数据，当考试结束就修改该条记录，当考试中断，则此记录就没修改，由此判断此次考试失败。
+
+#试卷的保密时间 和 开放时间(设置为end_time的第二天吧)
+
+#成绩表，注意：用户应该是不能删除自己的成绩的
+#思考：成绩是跟随testpaper级联删除，还是不跟随，永久保存？ 暂定设置级联删除，因为试卷删除了也就没法查看试卷了，此时可以另外增加一个表用来记录成绩的基本信息，暂时不做这个功能
+#把用户的答案也记下来,当答案公布之后可以对比答案，默认当end_time的第二天就可查看答案
+create table userscore(
+	score_id int primary key auto_increment,
+	u_id int,
+	test_id int,
+	score int,
+	test_start datetime,
+	test_end datetime, #是通过 开始时间 加上 考试总时间 计算出来的
+	single_answer varchar(100), #保存答案
+	multiple_answer varchar(100),
+	notes varchar(100) not null default '正在考试', #备注
+	foreign key (test_id) references testpaper(test_id) on delete cascade
+)charset utf8;
+
+
+

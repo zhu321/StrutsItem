@@ -1,0 +1,22 @@
+首先引入struts支持(手动)
+1.将架包复制到lib目录下
+2.将下载的struts的web.xml中的filter复制到web.xml中
+3.将struts.xml复制到src目录下
+
+#注意要所需的其他jar包也复制到lib目录下
+mysql , poi, jstl(注意要在web.xml中配置一下),上传下载的jar,json等
+
+
+eclipse没有jstl标签
+要手动加入jstl.jar和standard.jar
+然后将c.tld复制到WEB-INF文件夹下，在web.xml中配置jstl
+
+
+数据传递有两种方式：
+1.配置相应的属性，注意加上get,set方法
+2.通过request直接传输。
+
+#####################################################################################
+eclipse为什么form表单会有黄色！，，jstl标签也是
+
+

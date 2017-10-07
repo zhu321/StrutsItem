@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+	<!-- 配置支持动态调用 -->
+    <constant name="struts.enable.DynamicMethodInvocation" value="true" />
+
+    <package name="manager" namespace="/" extends="struts-default">
+    	<!-- 用户成绩 -->
+    	<action name="allUsersscore_*" class="com.cn.test.AllUsersscore" method="{1}">
+    		<result name="allscore">/testmanage/operuserscore.jsp</result>
+    	</action>
+    
+    
+    	<!-- 试卷的增删改查 -->
+    	<action name="selectTestpaperAction_*" class="com.cn.test.SelectTestpaperAction" method="{1}">
+    		<result name="selecttest">/testmanage/opertestpaper.jsp</result>
+    	</action>
+    	
+    	
+    	<!-- 手动生成试卷,,可以预览 -->
+    	<action name="manualCreateTestpaper_*" class="com.cn.test.ManualCreateTestpaper" method="{1}">
+    		<result name="manualtest">/testmanage/manualcreatetest.jsp</result>
+    	</action>
+    
+    	
+    	<!-- 自动生成试卷 -->
+    	<action name="autoCreateTestpaper_*" class="com.cn.test.AutoCreateTestpaper" method="{1}">
+    		<!-- 后台自动生成的试卷，会存入数据库 -->
+    		<result name="autotest" type="chain">
+    			<param name="actionName">selectDepartmentAction</param>
+    			<param name="method">selectdepart</param>
+    		</result>
+    		
+    		<!-- 用户模拟考试的试卷，不存入数据库 -->
+    		<result name="usermock">/testtraining/mockexamination.jsp</result>
+    		
+    	</action>
+    
+    	<!-- 查询出所有部门，生成试卷时要用 -->
+    	<action name="selectDepartmentAction_*" class="com.cn.test.SelectDepartmentAction" method="{1}">
+    		<!-- 查询所有部门，下拉列表用的 -->
+    		<result name="selectdeps">/testmanage/autocreatetest.jsp</result>
+    		
+    		<!-- 试卷查询的时候用的 -->
+    		<result name="selectopertest">/testmanage/opertestpaper.jsp</result>
+			
+			<!-- 查询用户成绩时要用 -->
+    		<result name="seletoperscore">/testmanage/operuserscore.jsp</result>
+    		
+    		<!-- 手动生成试卷时用 -->
+    		<result name="seletomanualtest">/testmanage/manualcreatetest.jsp</result>
+    	
+    		
+    		<!-- 按条件查询 -->
+    		<result name="selectdep">/sysmanage/maintaindepartment.jsp</result>
+    	</action>
+    
+    
+    
+    	<!-- 试卷维护 -->
+    	<action name="maintainTestpaperAction_*" class="com.cn.sysmanage.MaintainTestpaperAction" method="{1}">
+    		<!-- 添加之后直接查询，所以转发一下 -->
+    		<result name="addcondition" type="chain">
+    			<param name="actionName">maintainTestpaperAction</param>
+    			<param name="method">showConditions</param>
+    		</result>
+    		
+    		<result name="showcondition">/sysmanage/maintaintest.jsp</result>
+    	</action>
+    
+    	<!-- 部门维护，暂时都到/sysmanage/maintaindepartment.jsp，以后可能会有变动 -->
+    	<action name="operDeparmentAction_*" class="com.cn.sysmanage.OperDepartmentAction" method="{1}">
+    		
+    		<!-- 修改 -->
+    		<result name="updatedep" type="chain">
+    			<param name="actionName">selectDepartmentAction</param>
+    			<param name="method">selectDep</param>
+    		</result>
+    		
+    		<!-- 操作后，转发一下 -->
+    		<result name="deletedep" type="chain">
+    			<param name="actionName">selectDepartmentAction</param>
+    			<param name="method">selectDep</param>
+    		</result>
+    		
+    		<result name="adddep">/sysmanage/maintaindepartment.jsp</result>
+    	</action>
+    	
+		<!-- 批量导入试题 -->
+		<action name="inputChoicebankAction_*" class="com.cn.questionbank.InputchoicebankAction" method="{1}">
+			<result name="inputbankok">/testmanage/bankmanage.jsp</result>
+		</action>
+    	
+    	<!-- 操作用户，包括添加、删除等 -->
+    	<action name="optUsersAction_*" class="com.cn.manager.OptUsersAction" method="{1}">
+			
+			<!-- 添加用户，也要去查询条件,用转发 -->
+    		<result name="addusers" type="chain">
+				<param name="actionName">usersConditionAction</param>
+				<param name="method">getconditions</param>
+			</result>
+			
+			<!-- 删除选择的用户，注意条件转发 -->
+			<result name="delusersBychecked" type="chain">
+				<param name="actionName">selectUsersAction</param>
+				<param name="method">selectusers</param>
+			</result>
+			
+			<!-- 删除单个用户 -->
+			<result name="deloneusers" type="chain">
+				<param name="actionName">selectUsersAction</param>
+				<param name="method">selectusers</param>
+			</result>
+			
+			<!-- 修改用户1 -->
+			<result name="selectoneusers">/usermanage/updusers.jsp</result>
+			<!-- 修改用户2，条件要转发 -->
+			<result name="updateusers" type="chain">
+				<param name="actionName">selectUsersAction</param>
+				<param name="method">selectusers</param>
+			</result>
+    	
+    	</action>
+    
+		
+		<!-- 批量导入学员，返回到userslist.jsp时要去将条件查询出来 ，此处转发、重定向都行，此处用转发，因为还有一个提示信息-->
+		<action name="inputUsersAction_*" class="com.cn.manager.InputUsersAction" method="{1}">
+			<result name="inputok" type="chain">
+				<param name="actionName">usersConditionAction</param>
+				<param name="method">getconditions</param>
+			</result>
+		</action>
+		
+		
+		<!-- 按条件搜索学生,,注意要转发到usersConditionAction去数据库中查询页面显示所需的条件 -->
+		<action name="selectUsersAction_*" class="com.cn.manager.SelectUsersAction" method="{1}">
+			<!-- 不转发了，再把查询的方法写一遍，转发的话，标识符就没办法判断了 -->
+			<result name="selectusers">/usermanage/userslist.jsp</result>
+		</action>
+		
+		
+		<!-- 查询学历、部门、专业 -->
+		<action name="usersConditionAction_*" class="com.cn.manager.UsersConditionAction" method="{1}">
+			<result name="condition">/usermanage/userslist.jsp</result>
+			
+			<!-- 添加用户也要先将部门查出来 -->
+			<result name="adduserscondition">/usermanage/addusers.jsp</result>
+		</action>
+		
+		<!-- 注销 -->
+		<action name="logoutAction_*" class="com.cn.tools.LogoutAction" method="{1}">
+			<result name="mlogout">/mlogin.jsp</result>
+			<result name="ulogout">/ulogin.jsp</result>
+		</action>
+		
+		
+    	<!-- 登录 -->
+		<action name="managerLoginAction_*" class="com.cn.manager.ManagerLoginAction" method="{1}">
+			<result name="mloginok">/mindex.jsp</result>
+			<result name="mloginerror">/mlogin.jsp</result>
+		</action>
+		
+        
+    </package>
+    
+    <package name="users" namespace="/" extends="struts-default">
+    
+    	<!-- 题库训练 -->
+    	<action name="testtrainingAction_*" class="com.cn.testtraining.TesttrainingAction" method="{1}">
+    		<result name="training">/testtraining/training.jsp</result>
+    		<result name="multipletraining">/testtraining/multipletraining.jsp</result>
+    	</action>
+    
+    	
+    	<!-- 试卷保密时间过了就可查看试卷 -->
+    	<action name="showMytest_*" class="com.cn.test.ShowMytest" method="{1}">
+    		<result name="showtest">/testmanage/showmytest.jsp</result>
+    	</action>
+    
+    	<!-- 用户模拟考试判分 -->
+    	<action name="ajaxUsersAnswer_*" class="com.cn.test.AjaxUsersAnswer" method="{1}">
+			<!-- 通过流返回 -->
+    	</action>
+    
+    	<!-- 我的成绩 -->
+    	<action name="oneUserscore_*" class="com.cn.test.OneUserscore" method="{1}">
+    		<result name="myscore">/testmanage/myscore.jsp</result>
+    	</action>
+    	
+    	<!-- 判分，插入成绩表 -->
+    	<action name="answerAction_*" class="com.cn.test.AnswerAction" method="{1}">
+    		<result name="showscore">/testmanage/showscore.jsp</result>
+    	</action>
+    	
+    	
+    	
+    	<!-- 用户考试 -->
+    	<action name="usersTestAction_*" class="com.cn.test.UsersTestAction" method="{1}">
+    		<!-- 先查询出有哪些考试 -->
+    		<result name="showtest">/testmanage/showtests.jsp</result>
+    		<!-- 若当前还没有考试，就显示近一周的考试安排 -->
+    		<result name="nopaper">/testmanage/showtests.jsp</result>
+    	
+    		<!-- 用户考试 -->
+    		<result name="usertest">/testmanage/userstest.jsp</result>
+    		
+    		
+    	</action>
+    
+    	<!-- 换验证码 -->
+    	<action name="checkcode_*" class="com.users.action.Checkcode" method="{1}">
+    		<!-- 没有返回值，直接通过流返回 -->
+    	</action>
+    	
+    	<!-- 登录 -->
+    	<action name="userslogin_*" class="com.users.action.Userslogin" method="{1}">
+    		<result name="loginok">/uindex.jsp</result>
+    		<result name="error">/ulogin.jsp</result>
+    		<result name="active">/active.jsp</result>
+    	</action>
+    	
+    	<!-- 激活验证 -->
+    	<action name="checkActive_*" class="com.users.action.CheckActive" method="{1}">
+    		<!-- 通过流来返回 -->
+    	</action>
+    	
+    	<!-- 真正的激活 -->
+    	<action name="usersActive_*" class="com.users.action.UsersActive" method="{1}">
+    		<result name="activeok">/ulogin.jsp</result>
+    		<result name="activefalse">/active.jsp</result>
+    	</action>
+    
+    </package>
+
+    
+</struts>
+

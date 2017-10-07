@@ -1,0 +1,31 @@
+Mysql中将日期转为时间戳
+1、时间戳转日期，方法是select from_unixtime(1336542121);
+2、日期转时间戳，方法是：select unix_timestamp('2013-04-08′);
+
+#格式化
+FROM_UNIXTIME( unix_timestamp,format ) 
+
+注意字母的大小写表示的意义不一样
+DATE_FORMAT(NOW(),'%Y-%m-%d') 
+位置也可交换DATE_FORMAT(NOW(),'%m-%d-%Y') 
+
+查询第二天凌晨的时间
+select date_add(date_format('2017-02-12 12:23:23','%Y-%m-%d'),interval 1 day);
+
+ where now() > date_add(date_format('2017-02-12 12:23:23','%Y-%m-%d'),interval 1 day);
+
+
+DATE_SUB()返回的是格式化后的时间：2014-05-17
+需要用UNIX_TIMESTAMP()转化为UNIX时间戳形式对比：
+where inputtime>UNIX_TIMESTAMP(DATE_SUB(CURDATE(), INTERVAL 1 DAY))
+
+
+#查询第二天的sql:
+select date_add(curdate(),interval 1 day); #yyyy-MM-dd
+select date_add(now(),interval 1 day);  #yyyy-MM-dd HH:mm:ss
+select date_add('2017-02-12',interval 1 day);
+select date_add('2017-02-12 12:23:12',interval 1 day);
+
+
+
+DATE_SUB(CURDATE(), INTERVAL 1 DAY)
